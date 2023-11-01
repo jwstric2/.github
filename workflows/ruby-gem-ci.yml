@@ -3,17 +3,27 @@ name: ci
 on:
   workflow_call:
     inputs:
-      ruby-version:
+      ruby-versions:
         description: Ruby Test Versions
         required: true
-        type: list
+        type: string
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setVariables.outputs.matrix }}
+    steps:
+      - id: setVariables
+        run: |
+          echo "::set-output name=matrix::$input"
+        env:
+          input: ${{ inputs.ruby-versions }}
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby-version: ${{ inputs.ruby-version }}
+        ruby-version: ${{fromJson(needs.setup.outputs.matrix)}}
 
     steps:
     - uses: actions/checkout@v3
